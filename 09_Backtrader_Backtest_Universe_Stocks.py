@@ -8,7 +8,7 @@ import matplotlib
 import matplotlib.dates as mdates
 from matplotlib import pyplot as plt
 
-class MaCrossStrategy(bt.Strategy):
+class SMA_Crossover_Strategy(bt.Strategy):
 
     params = (
         ('fast_length', 9),
@@ -62,9 +62,9 @@ for tic in tickers_list:
     # data = bt.feeds.YahooFinanceData(dataname = s, fromdate = datetime(2010, 1, 1), todate = datetime(2020, 1, 1))
     cerebro.adddata(data, name = tic)
 
-cerebro.addstrategy(MaCrossStrategy)
+cerebro.addstrategy(SMA_Crossover_Strategy)
 cerebro.broker.setcash(30000.0)
-cerebro.addsizer(bt.sizers.PercentSizer, percents = 30)
+cerebro.addsizer(bt.sizers.PercentSizer, percents = 20)
  
 cerebro.addanalyzer(btanalyzers.SharpeRatio, _name = "sharpe")
 cerebro.addanalyzer(btanalyzers.Returns,     _name = "returns")

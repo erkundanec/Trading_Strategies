@@ -5,6 +5,8 @@ import datetime as dt  # For datetime objects
 import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 
+# sys.path.append('D:/07_Github_Repository/backtrader-master/')
+# import mymodule
 # Import the backtrader platform
 import backtrader as bt
 import pandas as pd
@@ -166,3 +168,5 @@ if __name__ == '__main__':
     # %matplotlib inline
     cerebro.plot()
     # plt.show()
+
+    

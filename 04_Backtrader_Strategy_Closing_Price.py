@@ -6,7 +6,10 @@ import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 import pandas as pd
 
-# Import the backtrader platform
+# sys.path.append('D:/07_Github_Repository/backtrader-master/')
+# # import mymodule
+# # Import the backtrader platform
+
 import backtrader as bt
 
 # Create a Stratey

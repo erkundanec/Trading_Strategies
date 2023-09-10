@@ -6,7 +6,8 @@ from matplotlib import pyplot as plt
 from datetime import datetime
 import pandas as pd
 import datetime as dt
- 
+
+# Create a subclass of Strategy to define the indicators and logic
 class SMA_CrossStrategy(bt.Strategy):
  
     def __init__(self):
@@ -28,7 +29,6 @@ class SMA_CrossStrategy(bt.Strategy):
     #             self.buy()
     #         elif self.crossover < 0:
     #             self.sell()
-
     #     elif self.crossover < 0: 
     #         self.close()
  

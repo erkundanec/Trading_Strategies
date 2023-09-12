@@ -1,3 +1,6 @@
+import sys
+sys.path.append('D:/07_Github_Repository/backtrader-master/')
+
 import backtrader as bt
 import backtrader.analyzers as btanalyzers
 # from datetime import datetime
@@ -37,9 +40,10 @@ class SMA_Crossover_Strategy(bt.Strategy):
  
 cerebro = bt.Cerebro()
 df_tics = pd.read_hdf("datasets/df_SnP_500_ohlcv.h5", "df", mode = 'r')
-
-tickers_list = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'V']
-# tickers_list = ['MSFT']
+tickers_list = df_tics['tic'].unique().tolist()
+# tickers_list = tickers_list[0:10]
+# tickers_list = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'V']
+tickers_list = ['TSLA']
 for tic in tickers_list: 
     df_tic = df_tics[df_tics['tic'] == tic]
     df_tic = df_tic.set_index('date')
@@ -55,7 +59,7 @@ for tic in tickers_list:
                                             volume=6,
                                             openinterest=-1,
                                             timeframe = bt.TimeFrame.Days,
-                                            fromdate=dt.datetime(2021, 1, 1),  # Specify the start date
+                                            fromdate=dt.datetime(2022, 10, 1),  # Specify the start date
                                             todate=dt.datetime(2023, 8, 24),   # Specify the end date
                                         )
 
@@ -64,7 +68,7 @@ for tic in tickers_list:
 
 cerebro.addstrategy(SMA_Crossover_Strategy)
 cerebro.broker.setcash(30000.0)
-cerebro.addsizer(bt.sizers.PercentSizer, percents = 20)
+cerebro.addsizer(bt.sizers.PercentSizer, percents = 100)
  
 cerebro.addanalyzer(btanalyzers.SharpeRatio, _name = "sharpe")
 cerebro.addanalyzer(btanalyzers.Returns,     _name = "returns")
@@ -107,8 +111,10 @@ print(back[0].analyzers.sharpe.get_analysis())
 # trans_df.to_excel('transactions.xlsx', index = False)
 # print(back[0].analyzers.trans.get_analysis())
 
-# cerebro.plot(style='candlestick', barup='green', bardown='red')
-cerebro.plot(numfigs=1, volume=False, iplot=False, style='bar')
+# cerebro.plot_goldie(style='candlestick', barup='green', bardown='red')
+cerebro.plot(style='candlestick', barup='green', bardown='red')
+# style='bar',
+# cerebro.plot_goldie(numfigs=1, volume=False, iplot=False, style='candlestick',barup='green', bardown='red')
 
 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
 plt.gcf().autofmt_xdate()  # Rotates the date labels for better visibility

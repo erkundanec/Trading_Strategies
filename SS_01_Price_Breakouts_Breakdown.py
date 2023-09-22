@@ -4,7 +4,8 @@ import numpy as np
 import pandas_ta as ta
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from datetime import datetime
+from datetime import datetime,timedelta
+# import datetime as dt
 import numpy as np
 from matplotlib import pyplot
 
@@ -386,17 +387,18 @@ def divsignal(df, nbackcandles, plot_flag = False):          # slope to find div
 
 def main():
     #%% Load and preprocess the data (data imputation)
-    tickers_list = []
-    tickers_list = ['DE']
-    # tickers_list = ['AAPL','TSLA','AMZN']
+    # tickers_list = []
+    # tickers_list = ['DE']
+    tickers_list = ['AAPL','TSLA','AMZN']
     if len(tickers_list)==1:
         plot_flag = True
     else:
         plot_flag = False
-    start_date = pd.to_datetime('2023-01-01').date()
+    # start_date = pd.to_datetime('2023-01-01').date()
     # end_date = pd.to_datetime('2021-12-31')
-    end_date =  pd.to_datetime('today').date()
 
+    end_date =  pd.to_datetime('today').date()
+    start_date = end_date - timedelta(days = 105)
     LP = Load_n_Preprocess(tickers_list = tickers_list,
                            start_date = start_date,
                            end_date = end_date,

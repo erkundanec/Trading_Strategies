@@ -8,6 +8,9 @@ from datetime import datetime,timedelta
 # import datetime as dt
 import numpy as np
 from matplotlib import pyplot
+from alive_progress import alive_bar
+import time
+import xlwings as xw
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -138,8 +141,6 @@ def RSI_divergence(df, tic, right_window = 5, left_window = 5, backcandles = 40,
     # start_idx = -100
     # end_idx = len(df)
 
-  
-
     # signal = divsignal(df, backcandles, plot_flag = plot_flag)
     signal = divsignal2(df, tic, backcandles, plot_flag = plot_flag)
     return signal
@@ -255,7 +256,7 @@ def divsignal2(df, tic, nbackcandles, plot_flag = False):      # pivot point to 
         return 0
     if slclos < -1e-4 and (minimRSI.size<2 or minim.size<2):
         return 0
-    print(tic)
+    # print(tic)
     if plot_flag == True:
         fig = make_subplots(rows=2, cols=1)
         fig.append_trace(go.Candlestick(x=df.index,
@@ -385,15 +386,15 @@ def divsignal(df, nbackcandles, plot_flag = False):          # slope to find div
     else:
         return 0             # hidden divergence
 
-def main():
+def main(today,sheet):
     #%% parameter initialization
-    right_window = 3
+    right_window = 5
     left_window = 5
     backcandles = 60
 
     # tickers_list = []
-    # tickers_list = ['DE']
-    tickers_list = ['AAPL','TSLA','AMZN']
+    tickers_list = ['AES']
+    # tickers_list = ['AES','ALLE','AMCR','AME']
     
     if len(tickers_list)==1:
         plot_flag = True
@@ -402,7 +403,7 @@ def main():
     
     # start_date = pd.to_datetime('2023-01-01').date()
     # end_date = pd.to_datetime('2021-12-31')
-    end_date =  pd.to_datetime('today').date()
+    end_date =  today
     start_date = end_date - timedelta(days = 125)
 
     #%% Load and preprocess the data (data imputation)
@@ -416,32 +417,56 @@ def main():
     #%% Generate and Filter Signals
     signal_dict = {}
     tickers_list = df_tics['tic'].unique().tolist()
-    for tic in tickers_list:
-        df_tic = df_tics[df_tics['tic'] == tic]
-        df_tic =  df_tic.drop(columns = ['tic','adj_close'])
+    with alive_bar(len(tickers_list), force_tty = True) as bar:
+        for tic in tickers_list:
+            time.sleep(0.005)
+            bar()
 
-        signal = RSI_divergence(df_tic, tic, 
-                                right_window = right_window, 
-                                left_window = left_window, 
-                                backcandles = backcandles, 
-                                plot_flag = plot_flag,
-                                )
-        
-        signal_dict[tic] = signal
+            df_tic = df_tics[df_tics['tic'] == tic]
+            df_tic =  df_tic.drop(columns = ['tic','adj_close'])
+
+            signal = RSI_divergence(df_tic, tic, 
+                                    right_window = right_window, 
+                                    left_window = left_window, 
+                                    backcandles = backcandles, 
+                                    plot_flag = plot_flag,
+                                    )
+            
+            signal_dict[tic] = signal
 
     df_signals = pd.DataFrame(signal_dict.items(),columns=['tic', 'signal'])
-    df_signals = df_signals[(df_signals['signal'] == 12)]
-    import xlwings as xw
+    df_signals = df_signals[(df_signals['signal'] == 23)]
+
+
+
+
     wb = xw.Book("results/df_signals.xlsx")
-    ws = wb.sheets["RSI_Signals"]
+    ws = wb.sheets[sheet]
     ws["A1"].options(pd.DataFrame, header = True, index = False, expand='table').value = pd.DataFrame(np.nan, index=np.arange(550), columns=['A', 'B'])
     ws["A1"].options(pd.DataFrame, header = True, index = False, expand='table').value = df_signals
     # df_signals.to_excel("results/df_signals.xlsx", index = False)
     wb.save()
 
+    return df_signals
+
 
 
 if __name__ == "__main__":
-    main()
+    today =  pd.to_datetime('today').date()
+    stocks_list_today = main(today,"RSI_Signals_Today")
+
+    # yesterday =  pd.to_datetime('today').date()- timedelta(days = 5)
+    # stocks_list_yesterday = main(yesterday,"RSI_Signals_Yesterday")
+
+    # stocks_recommendation = list(set(stocks_list_today['tic'])- set(stocks_list_yesterday['tic']) )
+
+    # wb = xw.Book("results/df_signals.xlsx")
+    # ws = wb.sheets["Common"]
+    # ws["A1"].options(pd.DataFrame, header = True, index = False, expand='table').value = pd.DataFrame(np.nan, index=np.arange(550), columns=['A', 'B'])
+    # ws["A1"].options(pd.DataFrame, header = True, index = False, expand='table').value = pd.DataFrame(stocks_recommendation,columns=['tic'])
+    # # df_signals.to_excel("results/df_signals.xlsx", index = False)
+    # wb.save()
+    
+    # print(stocks_recommendation)
 
 

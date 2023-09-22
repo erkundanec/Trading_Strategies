@@ -88,18 +88,18 @@ def add_technicals(df, technicals_list):
 
     return df
 
-def RSI_divergence(df, tic, window = 5, backcandles = 40, plot_flag = False):
+def RSI_divergence(df, tic, right_window = 5, left_window = 5, backcandles = 40, plot_flag = False):
     technicals_list = ['RSI']
     df = add_technicals(df, technicals_list)
     candleid = len(df)-1   # last candle
 
-    df = df.iloc[candleid-backcandles-window:candleid+1]
+    df = df.iloc[candleid-backcandles-left_window:candleid+1]
     df = df.reset_index(drop = True)
 
     candleid = len(df)-1   # last candle
 
-    df['price_pivot_id'] = df.apply(lambda x: price_pivot_id(df, x.name, window, window), axis=1)
-    df['RSI_pivot_id'] = df.apply(lambda x: RSI_pivot_id(df, x.name, window, window), axis=1)
+    df['price_pivot_id'] = df.apply(lambda x: price_pivot_id(df, x.name, left_window, right_window), axis=1)
+    df['RSI_pivot_id'] = df.apply(lambda x: RSI_pivot_id(df, x.name, left_window, right_window), axis=1)
     df['price_point_pos'] = df.apply(lambda row: price_point_pos(row), axis=1)
     df['RSI_point_pos'] = df.apply(lambda row: RSI_point_pos(row), axis=1)
 
@@ -386,19 +386,26 @@ def divsignal(df, nbackcandles, plot_flag = False):          # slope to find div
         return 0             # hidden divergence
 
 def main():
-    #%% Load and preprocess the data (data imputation)
+    #%% parameter initialization
+    right_window = 3
+    left_window = 5
+    backcandles = 60
+
     # tickers_list = []
     # tickers_list = ['DE']
     tickers_list = ['AAPL','TSLA','AMZN']
+    
     if len(tickers_list)==1:
         plot_flag = True
     else:
         plot_flag = False
+    
     # start_date = pd.to_datetime('2023-01-01').date()
     # end_date = pd.to_datetime('2021-12-31')
-
     end_date =  pd.to_datetime('today').date()
-    start_date = end_date - timedelta(days = 105)
+    start_date = end_date - timedelta(days = 125)
+
+    #%% Load and preprocess the data (data imputation)
     LP = Load_n_Preprocess(tickers_list = tickers_list,
                            start_date = start_date,
                            end_date = end_date,
@@ -406,16 +413,22 @@ def main():
     df_tics = LP.load_data()
     df_tics = LP.clean_data(df_tics)
 
+    #%% Generate and Filter Signals
     signal_dict = {}
     tickers_list = df_tics['tic'].unique().tolist()
     for tic in tickers_list:
         df_tic = df_tics[df_tics['tic'] == tic]
         df_tic =  df_tic.drop(columns = ['tic','adj_close'])
 
-        signal = RSI_divergence(df_tic, tic, window = 5, backcandles = 60, plot_flag = plot_flag)
+        signal = RSI_divergence(df_tic, tic, 
+                                right_window = right_window, 
+                                left_window = left_window, 
+                                backcandles = backcandles, 
+                                plot_flag = plot_flag,
+                                )
+        
         signal_dict[tic] = signal
 
-        # print(df.tail(3))
     df_signals = pd.DataFrame(signal_dict.items(),columns=['tic', 'signal'])
     df_signals = df_signals[(df_signals['signal'] == 12)]
     import xlwings as xw

@@ -52,7 +52,7 @@ def main():
                                             openinterest=-1,
                                             timeframe = bt.TimeFrame.Days,
                                             fromdate=dt.datetime(2023, 1, 1),  # Specify the start date
-                                            todate=dt.datetime(2023, 8, 24),   # Specify the end date
+                                            todate=dt.datetime(2023, 12, 22),   # Specify the end date
                                         )
     
     
@@ -61,7 +61,7 @@ def main():
     
     cerebro.addstrategy(SMA_CrossStrategy)
     
-    cerebro.broker.setcash(10000.0)
+    cerebro.broker.setcash(100000.0)
     
     cerebro.addsizer(bt.sizers.PercentSizer, percents = 100)
     
